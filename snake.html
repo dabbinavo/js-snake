@@ -1,0 +1,165 @@
+<html>
+
+<head>
+  <title>Richards Geburtstags-Snake</title>
+  <style type="text/css">
+    #canvas {
+      background-color: black;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canvas"></canvas>
+
+  <script>
+    const Direction = {
+      NONE: 0,
+      UP: 1,
+      RIGHT: 2,
+      DOWN: 3,
+      LEFT: 4
+    }
+
+    var tileSize = 15;
+    var tileCountX = 24;
+    var tileCountY = tileCountX;
+
+    var snakeColor = "lime";
+    var snakeX;
+    var snakeY;
+    var snakeDirection;
+    var snakeTail = [];
+
+    var appleColor = "red";
+    var appleX;
+    var appleY;
+
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+
+    ctx.canvas.width = tileCountX * tileSize;
+    ctx.canvas.height = tileCountY * tileSize;
+
+    init();
+
+    function loop() {
+      clearCanvas();
+
+      moveSnake();
+
+      checkSnakeCollision();
+      checkFoodCollision();
+
+      drawSnake();
+      drawFood();
+    }
+    var loopInterval = setInterval(loop, 100);
+
+
+    function init() {
+      snakeX = tileCountX / 2;
+      snakeY = tileCountY / 2;
+
+      snakeTail = [];
+      snakeTail.push({ x: snakeX, y: snakeY });
+      snakeDirection = Direction.NONE
+
+      appleX = getRandomNumber(0, tileCountX - 1);
+      appleY = getRandomNumber(0, tileCountY - 1);
+    }
+    
+
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function moveSnake() {
+      switch (snakeDirection) {
+        case Direction.RIGHT: snakeX++; break;
+        case Direction.LEFT: snakeX--; break;
+        case Direction.UP: snakeY++; break;
+        case Direction.DOWN: snakeY--; break;
+      }
+
+      if (snakeX < 0)
+        snakeX = tileCountX - 1;
+      else if (snakeX > tileCountX - 1)
+        snakeX = 0;
+      if (snakeY < 0)
+        snakeY = tileCountY - 1;
+      else if (snakeY > tileCountY - 1)
+        snakeY = 0;
+
+      if (snakeDirection !== Direction.NONE)
+        snakeTail.push({ x: snakeX, y: snakeY });
+    }
+
+    function checkFoodCollision() {
+      if (appleX == snakeX && appleY == snakeY) {
+        appleX = getRandomNumber(0, tileCountX - 1);
+        appleY = getRandomNumber(0, tileCountY - 1);
+      }
+      else if (snakeDirection !== Direction.NONE) {
+        snakeTail.shift();
+      }
+    }
+
+    function checkSnakeCollision() {
+      if (snakeDirection === Direction.NONE)
+        return;
+      for (var i = 0; i < snakeTail.length - 1; i++) {
+        if (snakeTail[i].x == snakeX && snakeTail[i].y == snakeY) {
+          init();
+        }
+      }
+    }
+
+    function drawSnake() {
+      for (var i = 0; i < snakeTail.length; i++) {
+        fillTile(snakeTail[i].x, snakeTail[i].y, snakeColor);
+      }
+    }
+
+    function drawFood() {
+      fillTile(appleX, appleY, appleColor);
+    }
+
+    function fillTile(x, y, color) {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.rect(x * tileSize, y * tileSize, tileSize * 0.9, tileSize * 0.9);
+      ctx.fill();
+      ctx.closePath();
+    }
+
+    function getRandomNumber(start, end) {
+      return Math.ceil(Math.random() * (end - start) + start);
+    }
+
+    function keyPressed(event) {
+      switch (event.keyCode) {
+        case 37:
+          if (snakeDirection != Direction.RIGHT)
+            snakeDirection = Direction.LEFT;
+          break;
+        case 38:
+          if (snakeDirection != Direction.UP)
+            snakeDirection = Direction.DOWN;
+          break;
+        case 39:
+          if (snakeDirection != Direction.LEFT)
+            snakeDirection = Direction.RIGHT;
+          break;
+        case 40:
+          if (snakeDirection != Direction.DOWN)
+            snakeDirection = Direction.UP;
+          break;
+      }
+    }
+    document.addEventListener("keydown", keyPressed);
+
+  </script>
+</body>
+
+</html>
